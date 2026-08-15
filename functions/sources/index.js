@@ -7,5 +7,11 @@
 const keishicho = require('./keishicho');
 const npa = require('./npa');
 const osaka = require('./osaka');
+const kanagawa = require('./kanagawa');
+const ibaraki = require('./ibaraki');
+const chiba = require('./chiba');
+const aichi = require('./aichi');
+const yamaguchi = require('./yamaguchi');
+const fukuoka = require('./fukuoka');
 
-module.exports = [keishicho, npa, osaka];
+module.exports = [keishicho, npa, osaka, kanagawa, ibaraki, chiba, aichi, yamaguchi, fukuoka];
