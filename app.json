@@ -2,6 +2,7 @@
   "expo": {
     "name": "指名手配ウォッチ",
     "slug": "wanted-watch",
+    "owner": "ktn935",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +11,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ktn935.wantedwatch",
-      "appleTeamId": "AFH9MLDYBU"
+      "appleTeamId": "AFH9MLDYBU",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -50,6 +54,25 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "bundleIdentifier": "com.ktn935.wantedwatch.widget",
+                  "targetName": "widget",
+                  "entitlements": {}
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "0bee97b8-65ee-49fa-8b89-3baa59b5983f"
+      }
     }
   }
 }
