@@ -3,6 +3,7 @@ import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { WantedListItem } from '@/lib/types';
+import { theme } from '@/constants/Colors';
 
 export default function WantedCard({
   item,
@@ -14,12 +15,12 @@ export default function WantedCard({
   onToggleFavorite: () => void;
 }) {
   return (
-    <TouchableOpacity style={styles.card} onPress={() => Linking.openURL(item.sourceUrl)}>
+    <TouchableOpacity style={styles.row} onPress={() => Linking.openURL(item.sourceUrl)}>
       {item.photoUrl ? (
         <Image source={{ uri: item.photoUrl }} style={styles.photo} />
       ) : (
         <View style={[styles.photo, styles.photoPlaceholder]}>
-          <FontAwesome name="user" size={28} color="#bbb" />
+          <FontAwesome name="user" size={24} color={theme.textMuted} />
         </View>
       )}
       <View style={styles.info}>
@@ -30,18 +31,22 @@ export default function WantedCard({
             onPress={onToggleFavorite}>
             <FontAwesome
               name={isFavorite ? 'heart' : 'heart-o'}
-              size={20}
-              color={isFavorite ? '#c0392b' : '#999'}
+              size={18}
+              color={isFavorite ? theme.danger : theme.textMuted}
             />
           </TouchableOpacity>
         </View>
-        <Text style={styles.detail}>{item.title ?? '不明'}</Text>
+        <Text style={styles.link}>{item.title ?? '不明'}</Text>
         {item.distanceKm != null && (
           <Text style={styles.distance}>現在地から約{item.distanceKm.toFixed(1)}km</Text>
         )}
-        <Text style={styles.detail}>発生場所: {item.occurrencePlace ?? '不明'}</Text>
+        <Text style={styles.detail}>
+          発生場所: <Text style={styles.link}>{item.occurrencePlace ?? '不明'}</Text>
+        </Text>
         <Text style={styles.detail}>特徴: {item.characteristics ?? '不明'}</Text>
-        <Text style={styles.detail}>管轄: {item.stationName ?? '不明'}</Text>
+        <Text style={styles.detail}>
+          管轄: <Text style={styles.link}>{item.stationName ?? '不明'}</Text>
+        </Text>
         <Text style={styles.detail}>電話: {item.phone ?? '不明'}</Text>
         <Text style={styles.reward}>
           懸賞金: {item.rewardAmount != null ? `${item.rewardAmount.toLocaleString()}円` : '不明'}
@@ -54,21 +59,21 @@ export default function WantedCard({
 }
 
 const styles = StyleSheet.create({
-  card: {
+  row: {
     flexDirection: 'row',
-    marginBottom: 12,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    overflow: 'hidden',
-    elevation: 2,
+    backgroundColor: theme.surface,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+    marginBottom: 10,
   },
-  photo: { width: 90, height: 90 },
-  photoPlaceholder: { backgroundColor: '#eee', justifyContent: 'center', alignItems: 'center' },
-  info: { flex: 1, padding: 8 },
+  photo: { width: 84, height: 84 },
+  photoPlaceholder: { backgroundColor: '#111', justifyContent: 'center', alignItems: 'center' },
+  info: { flex: 1, padding: 10 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  name: { fontSize: 16, fontWeight: 'bold', flexShrink: 1, marginRight: 8 },
-  detail: { fontSize: 12, color: '#333', marginTop: 2 },
-  distance: { fontSize: 12, color: '#c0392b', marginTop: 2, fontWeight: '600' },
-  reward: { fontSize: 12, color: '#b8860b', marginTop: 2, fontWeight: '600' },
-  source: { fontSize: 10, color: '#999', marginTop: 4 },
+  name: { fontSize: 16, fontWeight: 'bold', color: theme.text, flexShrink: 1, marginRight: 8 },
+  link: { color: theme.accent },
+  detail: { fontSize: 12, color: theme.textMuted, marginTop: 3 },
+  distance: { fontSize: 12, color: theme.danger, marginTop: 3, fontWeight: '600' },
+  reward: { fontSize: 12, color: theme.danger, marginTop: 4, fontWeight: '700' },
+  source: { fontSize: 10, color: theme.textMuted, marginTop: 6 },
 });

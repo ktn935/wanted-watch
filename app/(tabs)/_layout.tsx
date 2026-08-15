@@ -2,8 +2,7 @@ import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
+import { theme } from '@/constants/Colors';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
 function TabBarIcon(props: {
@@ -14,12 +13,18 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: theme.accent,
+        tabBarInactiveTintColor: theme.textMuted,
+        tabBarStyle: {
+          backgroundColor: theme.background,
+          borderTopColor: theme.border,
+        },
+        headerStyle: { backgroundColor: theme.background },
+        headerTintColor: theme.text,
+        headerTitleStyle: { color: theme.text },
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
         headerShown: useClientOnlyValue(false, true),

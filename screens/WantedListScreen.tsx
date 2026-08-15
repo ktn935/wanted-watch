@@ -16,6 +16,7 @@ import * as Location from 'expo-location';
 import { fetchWantedSuspects, WantedSuspect } from '../lib/wantedApi';
 import { useFavorites } from '../lib/FavoritesContext';
 import WantedCard from '../components/WantedCard';
+import { theme } from '../constants/Colors';
 
 type SortKey = 'distance' | 'reward';
 const ALL_STATIONS = 'すべて';
@@ -86,22 +87,22 @@ export default function WantedListScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
+      <View style={[styles.center, styles.screen]}>
+        <ActivityIndicator size="large" color={theme.accent} />
       </View>
     );
   }
 
   if (errorMessage) {
     return (
-      <View style={styles.center}>
-        <Text>{errorMessage}</Text>
+      <View style={[styles.center, styles.screen]}>
+        <Text style={styles.errorText}>{errorMessage}</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.screen}>
       <View style={styles.toolbar}>
         <View style={styles.sortRow}>
           <SortButton
@@ -142,7 +143,7 @@ export default function WantedListScreen() {
         )}
         ListEmptyComponent={
           <View style={styles.center}>
-            <Text>該当する指名手配情報がありません。</Text>
+            <Text style={styles.emptyText}>該当する指名手配情報がありません。</Text>
           </View>
         }
       />
@@ -167,30 +168,38 @@ function SortButton({
 }
 
 const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: theme.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  toolbar: { paddingTop: 8, backgroundColor: '#f5f5f5' },
+  errorText: { color: theme.text },
+  emptyText: { color: theme.textMuted },
+  toolbar: {
+    paddingTop: 8,
+    backgroundColor: theme.background,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.border,
+  },
   sortRow: { flexDirection: 'row', paddingHorizontal: 12, marginBottom: 8 },
   sortButton: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: '#e0e0e0',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
+    backgroundColor: theme.surface,
     marginRight: 8,
   },
-  sortButtonActive: { backgroundColor: '#c0392b' },
-  sortButtonText: { fontSize: 12, color: '#333' },
-  sortButtonTextActive: { color: '#fff', fontWeight: '600' },
+  sortButtonActive: { backgroundColor: theme.danger, borderColor: theme.danger },
+  sortButtonText: { fontSize: 12, color: theme.textMuted },
+  sortButtonTextActive: { color: theme.text, fontWeight: '600' },
   filterRow: { paddingHorizontal: 12, marginBottom: 8 },
   chip: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.border,
     marginRight: 8,
   },
-  chipActive: { backgroundColor: '#333', borderColor: '#333' },
-  chipText: { fontSize: 12, color: '#333' },
-  chipTextActive: { color: '#fff' },
-  list: { padding: 12 },
+  chipActive: { backgroundColor: theme.accent, borderColor: theme.accent },
+  chipText: { fontSize: 12, color: theme.textMuted },
+  chipTextActive: { color: '#000', fontWeight: '600' },
+  list: { padding: 12, backgroundColor: theme.background },
 });

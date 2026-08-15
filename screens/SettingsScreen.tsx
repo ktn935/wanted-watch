@@ -3,6 +3,8 @@
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { theme } from '../constants/Colors';
+
 export default function SettingsScreen() {
   return (
     <View style={styles.container}>
@@ -27,15 +29,15 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'space-between' },
+  container: { flex: 1, justifyContent: 'space-between', backgroundColor: theme.background },
   settingsList: { padding: 16 },
-  placeholder: { fontSize: 14, color: '#999' },
+  placeholder: { fontSize: 14, color: theme.textMuted },
   aboutSection: {
     padding: 24,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#ddd',
+    borderTopColor: theme.border,
   },
-  aboutTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 8 },
-  aboutBody: { fontSize: 13, marginBottom: 8 },
-  source: { fontSize: 12, color: '#999', marginTop: 4 },
+  aboutTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 8, color: theme.text },
+  aboutBody: { fontSize: 13, marginBottom: 8, color: theme.textMuted },
+  source: { fontSize: 12, color: theme.textMuted, marginTop: 4 },
 });

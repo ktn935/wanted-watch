@@ -1,12 +1,11 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
 import { FavoritesProvider } from '@/lib/FavoritesContext';
 
 export {
@@ -46,10 +45,10 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
+  // このアプリは常に黒基調のテーマで統一するため、システムのライト/ダーク設定に
+  // 関わらずDarkThemeを固定で使う。
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DarkTheme}>
       <FavoritesProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
