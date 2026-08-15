@@ -13,7 +13,10 @@
       "bundleIdentifier": "com.ktn935.wantedwatch",
       "appleTeamId": "AFH9MLDYBU",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {
