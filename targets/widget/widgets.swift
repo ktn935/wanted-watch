@@ -11,6 +11,7 @@ private struct FirestoreListResponse: Decodable {
 }
 
 private struct FirestoreDocument: Decodable {
+    let name: String?
     let fields: [String: FirestoreValue]
     let updateTime: String?
 }
@@ -28,6 +29,7 @@ private struct FirestoreValue: Decodable {
 // MARK: - アプリ内で扱う被疑者情報
 
 struct WantedSuspect {
+    let id: String
     let suspectName: String?
     let title: String?
     let stationName: String?
@@ -35,23 +37,50 @@ struct WantedSuspect {
     let sourceUrl: String
     let location: CLLocation?
     var distanceKm: Double?
+    var isFavorite: Bool = false
 }
 
 private let firestoreListURL =
     "https://firestore.googleapis.com/v1/projects/wanted-watch-d7b14/databases/(default)/documents/wantedSuspects?pageSize=50&orderBy=updatedAt%20desc"
 
-private func fetchSuspects() async -> [WantedSuspect] {
-    guard let url = URL(string: firestoreListURL) else { return [] }
+private let appGroupId = "group.com.ktn935.wantedwatch"
+
+// アプリ側(FavoritesContext)がApp Group経由で書き込むお気に入りIDの一覧を読み込む
+private func loadFavoriteIds() -> Set<String> {
+    guard let json = UserDefaults(suiteName: appGroupId)?.string(forKey: "favoriteIds"),
+          let data = json.data(using: .utf8),
+          let ids = try? JSONDecoder().decode([String].self, from: data) else {
+        return []
+    }
+    return Set(ids)
+}
+
+private func fetchSuspects() async -> (suspects: [WantedSuspect], debugError: String?) {
+    guard let url = URL(string: firestoreListURL) else {
+        return ([], "URL構築失敗")
+    }
     do {
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(FirestoreListResponse.self, from: data)
-        return (response.documents ?? []).compactMap { doc -> WantedSuspect? in
+        // ウィジェットの処理時間予算は短いため、デフォルト(60秒)より
+        // 十分短いタイムアウトを明示的に設定する。
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 5
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
+            let bodyPreview = String(data: data.prefix(200), encoding: .utf8) ?? ""
+            return ([], "HTTP \(http.statusCode): \(bodyPreview)")
+        }
+        let decoded = try JSONDecoder().decode(FirestoreListResponse.self, from: data)
+        let suspects = (decoded.documents ?? []).compactMap { doc -> WantedSuspect? in
             guard let sourceUrl = doc.fields["sourceUrl"]?.stringValue else { return nil }
+            // Firestoreの"name"は "projects/.../documents/wantedSuspects/{docId}" の形式。
+            // {docId}はJS側(functions/writeToFirestore.js)のidと同じ値。
+            guard let docId = doc.name?.split(separator: "/").last.map(String.init) else { return nil }
             var location: CLLocation?
             if let geo = doc.fields["location"]?.geoPointValue {
                 location = CLLocation(latitude: geo.latitude, longitude: geo.longitude)
             }
             return WantedSuspect(
+                id: docId,
                 suspectName: doc.fields["suspectName"]?.stringValue,
                 title: doc.fields["title"]?.stringValue,
                 stationName: doc.fields["stationName"]?.stringValue,
@@ -61,8 +90,12 @@ private func fetchSuspects() async -> [WantedSuspect] {
                 distanceKm: nil
             )
         }
+        if suspects.isEmpty, !(decoded.documents ?? []).isEmpty {
+            return ([], "取得0件(全件パース失敗, documents=\((decoded.documents ?? []).count))")
+        }
+        return (suspects, nil)
     } catch {
-        return []
+        return ([], "取得エラー: \(error)")
     }
 }
 
@@ -78,10 +111,25 @@ private final class OneShotLocationFetcher: NSObject, CLLocationManagerDelegate 
         guard status == .authorizedWhenInUse || status == .authorizedAlways else {
             return nil
         }
-        return await withCheckedContinuation { continuation in
-            self.continuation = continuation
-            manager.delegate = self
-            manager.requestLocation()
+        // requestLocation()がdidUpdateLocations/didFailWithErrorのどちらも呼ばないまま
+        // 応答しないケースがあり、その場合ウィジェットの処理時間予算を超えて
+        // 「読み込み中」のまま固まって見えてしまう。3秒でタイムアウトして
+        // 現在地無し(nil)にフォールバックする。
+        return await withTaskGroup(of: CLLocation?.self) { group in
+            group.addTask {
+                await withCheckedContinuation { continuation in
+                    self.continuation = continuation
+                    self.manager.delegate = self
+                    self.manager.requestLocation()
+                }
+            }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                return nil
+            }
+            let result = await group.next() ?? nil
+            group.cancelAll()
+            return result
         }
     }
 
@@ -98,7 +146,9 @@ private final class OneShotLocationFetcher: NSObject, CLLocationManagerDelegate 
 
 private func loadImage(urlString: String?) async -> UIImage? {
     guard let urlString, let url = URL(string: urlString) else { return nil }
-    guard let (data, _) = try? await URLSession.shared.data(from: url) else { return nil }
+    var request = URLRequest(url: url)
+    request.timeoutInterval = 5
+    guard let (data, _) = try? await URLSession.shared.data(for: request) else { return nil }
     return UIImage(data: data)
 }
 
@@ -108,6 +158,7 @@ struct WantedEntry: TimelineEntry {
     let date: Date
     let suspect: WantedSuspect?
     let image: UIImage?
+    var debugMessage: String? = nil
 }
 
 struct Provider: TimelineProvider {
@@ -121,47 +172,89 @@ struct Provider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<WantedEntry>) -> Void) {
         Task {
-            var suspects = await fetchSuspects()
-            let currentLocation = await OneShotLocationFetcher().fetch()
-
-            if let currentLocation {
-                // 現在地が取れた場合は、位置情報を持つ被疑者を近い順に並べ、
-                // 位置情報が無いものは末尾に回す。
-                suspects = suspects.map { suspect in
-                    var copy = suspect
-                    if let location = suspect.location {
-                        copy.distanceKm = currentLocation.distance(from: location) / 1000
-                    }
-                    return copy
+            // 個々の通信・位置情報取得にタイムアウトを設けていても、想定外の要因で
+            // 全体として固まってしまう可能性はゼロにできない。ウィジェットが
+            // 「読み込み中」のまま表示され続けることだけは避けたいので、
+            // 全体にも上限時間を設け、超えたら最低限のフォールバック表示にする。
+            let timeline = await withTaskGroup(of: Timeline<WantedEntry>?.self) { group in
+                group.addTask { await self.buildTimeline() }
+                group.addTask {
+                    try? await Task.sleep(nanoseconds: 12_000_000_000)
+                    return Timeline(
+                        entries: [WantedEntry(date: Date(), suspect: nil, image: nil, debugMessage: "タイムアウトしました")],
+                        policy: .after(Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date())
+                    )
                 }
-                suspects.sort { a, b in
-                    switch (a.distanceKm, b.distanceKm) {
-                    case let (da?, db?): return da < db
-                    case (nil, nil): return false
-                    case (nil, _): return false
-                    case (_, nil): return true
-                    }
-                }
+                let result = await group.next() ?? nil
+                group.cancelAll()
+                return result ?? Timeline(entries: [WantedEntry(date: Date(), suspect: nil, image: nil, debugMessage: "タイムアウトしました")], policy: .after(Date()))
             }
-
-            let now = Date()
-            var entries: [WantedEntry] = []
-            let rotationCount = min(suspects.count, 5)
-
-            if rotationCount == 0 {
-                entries.append(WantedEntry(date: now, suspect: nil, image: nil))
-            } else {
-                for index in 0..<rotationCount {
-                    let suspect = suspects[index]
-                    let entryDate = Calendar.current.date(byAdding: .minute, value: index * 15, to: now) ?? now
-                    let image = await loadImage(urlString: suspect.photoUrl)
-                    entries.append(WantedEntry(date: entryDate, suspect: suspect, image: image))
-                }
-            }
-
-            let refreshDate = Calendar.current.date(byAdding: .hour, value: 1, to: now) ?? now
-            completion(Timeline(entries: entries, policy: .after(refreshDate)))
+            completion(timeline)
         }
+    }
+
+    private func buildTimeline() async -> Timeline<WantedEntry> {
+        let fetchResult = await fetchSuspects()
+        var suspects = fetchResult.suspects
+        let currentLocation = await OneShotLocationFetcher().fetch()
+
+        if let currentLocation {
+            // 現在地が取れた場合は、位置情報を持つ被疑者を近い順に並べ、
+            // 位置情報が無いものは末尾に回す。
+            suspects = suspects.map { suspect in
+                var copy = suspect
+                if let location = suspect.location {
+                    copy.distanceKm = currentLocation.distance(from: location) / 1000
+                }
+                return copy
+            }
+            suspects.sort { a, b in
+                switch (a.distanceKm, b.distanceKm) {
+                case let (da?, db?): return da < db
+                case (nil, nil): return false
+                case (nil, _): return false
+                case (_, nil): return true
+                }
+            }
+        }
+
+        // ローテーション対象を組み立てる: 先頭は必ず現在地から最も近い1件(基本ケース)、
+        // 続けてお気に入り登録された被疑者(近い順に含まれていない分)を追加する。
+        let favoriteIds = loadFavoriteIds()
+        var rotationSuspects: [WantedSuspect] = []
+        var seenIds = Set<String>()
+
+        for suspect in suspects.prefix(3) {
+            guard !seenIds.contains(suspect.id) else { continue }
+            var copy = suspect
+            copy.isFavorite = favoriteIds.contains(suspect.id)
+            rotationSuspects.append(copy)
+            seenIds.insert(suspect.id)
+        }
+        for suspect in suspects where favoriteIds.contains(suspect.id) {
+            guard rotationSuspects.count < 5, !seenIds.contains(suspect.id) else { continue }
+            var copy = suspect
+            copy.isFavorite = true
+            rotationSuspects.append(copy)
+            seenIds.insert(suspect.id)
+        }
+
+        let now = Date()
+        var entries: [WantedEntry] = []
+
+        if rotationSuspects.isEmpty {
+            let message = fetchResult.debugError ?? "被疑者データが0件でした"
+            entries.append(WantedEntry(date: now, suspect: nil, image: nil, debugMessage: message))
+        } else {
+            for (index, suspect) in rotationSuspects.enumerated() {
+                let entryDate = Calendar.current.date(byAdding: .minute, value: index * 15, to: now) ?? now
+                let image = await loadImage(urlString: suspect.photoUrl)
+                entries.append(WantedEntry(date: entryDate, suspect: suspect, image: image))
+            }
+        }
+
+        let refreshDate = Calendar.current.date(byAdding: .hour, value: 1, to: now) ?? now
+        return Timeline(entries: entries, policy: .after(refreshDate))
     }
 }
 
@@ -193,10 +286,17 @@ struct widgetEntryView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(suspect.suspectName ?? "不明")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        Text(suspect.suspectName ?? "不明")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        if suspect.isFavorite {
+                            Image(systemName: "star.fill")
+                                .font(.caption2)
+                                .foregroundColor(accent)
+                        }
+                    }
                     Text(suspect.title ?? "不明")
                         .font(.caption)
                         .foregroundColor(accent)
@@ -218,13 +318,15 @@ struct widgetEntryView: View {
             .padding(12)
             .containerBackground(Color.black, for: .widget)
         } else {
-            VStack {
+            VStack(spacing: 4) {
                 Text("指名手配ウォッチ")
                     .font(.caption)
                     .foregroundColor(.white)
-                Text("データを取得できませんでした")
+                Text(entry.debugMessage ?? "データを取得できませんでした")
                     .font(.caption2)
                     .foregroundColor(muted)
+                    .lineLimit(4)
+                    .multilineTextAlignment(.center)
             }
             .padding(12)
             .containerBackground(Color.black, for: .widget)

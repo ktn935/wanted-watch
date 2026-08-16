@@ -6,5 +6,8 @@ module.exports = config => ({
     $accent: "#ff8c00",
     $widgetBackground: "#000000",
   },
-  entitlements: {},
+  entitlements: {
+    "com.apple.security.application-groups":
+      config.ios.entitlements["com.apple.security.application-groups"],
+  },
 });

@@ -4,9 +4,13 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import { ExtensionStorage } from '@bacons/apple-targets';
 import { WantedListItem } from './types';
 
 const STORAGE_KEY = 'wantedWatch:favorites';
+const APP_GROUP = 'group.com.ktn935.wantedwatch';
+const widgetStorage = Platform.OS === 'ios' ? new ExtensionStorage(APP_GROUP) : null;
 
 type FavoritesContextValue = {
   favorites: WantedListItem[];
@@ -41,6 +45,16 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(favoritesMap)).catch((e) => {
       console.warn('お気に入りの保存に失敗しました', e);
     });
+
+    // ウィジェット(App Group経由)にもお気に入りIDを共有し、ローテーションに反映させる
+    if (widgetStorage) {
+      try {
+        widgetStorage.set('favoriteIds', JSON.stringify(Object.keys(favoritesMap)));
+        ExtensionStorage.reloadWidget();
+      } catch (e) {
+        console.warn('ウィジェットへのお気に入り共有に失敗しました', e);
+      }
+    }
   }, [favoritesMap]);
 
   const toggleFavorite = (item: WantedListItem) => {

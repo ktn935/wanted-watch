@@ -12,6 +12,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ktn935.wantedwatch",
       "appleTeamId": "AFH9MLDYBU",
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.com.ktn935.wantedwatch"]
+      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
@@ -68,7 +71,9 @@
                 {
                   "bundleIdentifier": "com.ktn935.wantedwatch.widget",
                   "targetName": "widget",
-                  "entitlements": {}
+                  "entitlements": {
+                    "com.apple.security.application-groups": ["group.com.ktn935.wantedwatch"]
+                  }
                 }
               ]
             }
