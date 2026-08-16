@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+<defs>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#f4f5f8"/>
+<stop offset="45%" stop-color="#c7cbd3"/>
+<stop offset="100%" stop-color="#7d828c"/>
+</linearGradient>
+</defs>
+
+<rect x="0" y="0" width="400" height="400" fill="#ffffff"/>
+
+<text x="40" y="270" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="230" fill="#141414">G</text>
+
+<circle cx="285" cy="187" r="72" fill="none" stroke="url(#metal)" stroke-width="30"/>
+<path d="M 235 148 A 72 72 0 0 1 298 124" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="6" stroke-linecap="round"/>
+
+<rect x="269" y="242" width="34" height="24" rx="7" fill="#262a32"/>
+<circle cx="286" cy="254" r="3.5" fill="#e8e9ec"/>
+
+<ellipse cx="357" cy="222" rx="11" ry="15" fill="none" stroke="url(#metal)" stroke-width="9"/>
+<ellipse cx="357" cy="250" rx="11" ry="15" fill="none" stroke="url(#metal)" stroke-width="9"/>
+<ellipse cx="357" cy="278" rx="11" ry="15" fill="none" stroke="url(#metal)" stroke-width="9"/>
+</svg>

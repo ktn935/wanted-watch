@@ -125,7 +125,7 @@ struct widgetEntryView: View {
             .containerBackground(Color.black, for: .widget)
         } else {
             VStack(spacing: 4) {
-                Text("指名手配ウォッチ")
+                Text("全国指名手配GO")
                     .font(.caption)
                     .foregroundColor(.white)
                 Text("お気に入りに登録した指名手配情報がここに表示されます")
@@ -168,7 +168,7 @@ struct widget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             widgetEntryView(entry: entry)
         }
-        .configurationDisplayName("指名手配ウォッチ")
+        .configurationDisplayName("全国指名手配GO")
         .description("お気に入り登録した指名手配情報を表示します。")
         .contentMarginsDisabled()
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
