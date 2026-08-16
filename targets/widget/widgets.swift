@@ -78,6 +78,11 @@ struct Provider: TimelineProvider {
 }
 
 // MARK: - View
+//
+// 全サイズ(Small/Medium/Large)共通で「写真を全面に敷き、下部にグラデーションで
+// 情報を重ねるポスター風レイアウト」にする。サイズが変わっても写真の占有面積が
+// 最大になる(=情報テキストは写真の上に重ねるだけで、専用のスペースを取らない)
+// ようにするための設計。
 
 struct widgetEntryView: View {
     var entry: Provider.Entry
@@ -85,43 +90,38 @@ struct widgetEntryView: View {
 
     // アプリ本体と統一したダーク基調の配色
     private let accent = Color(red: 1.0, green: 0.549, blue: 0.0) // #ff8c00
-    private let muted = Color(white: 0.6)
+    private let muted = Color(white: 0.75)
 
     var body: some View {
         if let suspect = entry.suspect {
-            HStack(alignment: .top, spacing: 8) {
-                if let uiImage = entry.image {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 56, height: 56)
-                        .clipped()
-                } else {
-                    Rectangle()
-                        .fill(Color(white: 0.1))
-                        .frame(width: 56, height: 56)
-                        .overlay(Image(systemName: "star.fill").foregroundColor(accent))
-                }
+            ZStack(alignment: .bottomLeading) {
+                photoView
 
-                VStack(alignment: .leading, spacing: 3) {
+                LinearGradient(
+                    colors: [.black.opacity(0), .black.opacity(0.55), .black.opacity(0.92)],
+                    startPoint: .center,
+                    endPoint: .bottom
+                )
+
+                VStack(alignment: .leading, spacing: family == .systemSmall ? 1 : 3) {
                     Text(suspect.suspectName ?? "不明")
-                        .font(.headline)
+                        .font(family == .systemLarge ? .title3 : .headline)
+                        .fontWeight(.bold)
                         .foregroundColor(.white)
                         .lineLimit(1)
                     Text(suspect.title ?? "不明")
                         .font(.caption)
                         .foregroundColor(accent)
                         .lineLimit(family == .systemSmall ? 1 : 2)
-                    if family != .systemSmall, let stationName = suspect.stationName {
+                    if family == .systemLarge, let stationName = suspect.stationName {
                         Text("管轄: \(stationName)")
                             .font(.caption2)
                             .foregroundColor(muted)
                             .lineLimit(1)
                     }
                 }
-                Spacer()
+                .padding(family == .systemSmall ? 10 : 14)
             }
-            .padding(12)
             .containerBackground(Color.black, for: .widget)
         } else {
             VStack(spacing: 4) {
@@ -134,8 +134,29 @@ struct widgetEntryView: View {
                     .lineLimit(4)
                     .multilineTextAlignment(.center)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(12)
             .containerBackground(Color.black, for: .widget)
+        }
+    }
+
+    @ViewBuilder
+    private var photoView: some View {
+        if let uiImage = entry.image {
+            Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+        } else {
+            Rectangle()
+                .fill(Color(white: 0.12))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .overlay(
+                    Image(systemName: "star.fill")
+                        .font(.system(size: family == .systemSmall ? 28 : 44))
+                        .foregroundColor(accent.opacity(0.6))
+                )
         }
     }
 }
@@ -149,7 +170,8 @@ struct widget: Widget {
         }
         .configurationDisplayName("指名手配ウォッチ")
         .description("お気に入り登録した指名手配情報を表示します。")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .contentMarginsDisabled()
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
