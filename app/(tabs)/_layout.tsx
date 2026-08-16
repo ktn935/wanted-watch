@@ -25,6 +25,7 @@ export default function TabLayout() {
         headerStyle: { backgroundColor: theme.background },
         headerTintColor: theme.text,
         headerTitleStyle: { color: theme.text },
+        headerTitleAlign: 'left',
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
         headerShown: useClientOnlyValue(false, true),
