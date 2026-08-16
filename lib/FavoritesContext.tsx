@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { ExtensionStorage } from '@bacons/apple-targets';
 import { WantedListItem } from './types';
+import { startOrUpdateActivity, endActivity } from '@/modules/live-activity';
 
 const STORAGE_KEY = 'wantedWatch:favorites';
 const APP_GROUP = 'group.com.ktn935.wantedwatch';
@@ -63,6 +64,23 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         ExtensionStorage.reloadWidget();
       } catch (e) {
         console.warn('ウィジェットへのお気に入り共有に失敗しました', e);
+      }
+    }
+
+    // ロック画面/Dynamic IslandのLive Activityは、最後にお気に入り登録した1件を表示する。
+    // お気に入りが無くなったら終了する。
+    if (Platform.OS === 'ios') {
+      const items = Object.values(favoritesMap);
+      if (items.length === 0) {
+        endActivity();
+      } else {
+        const latest = items[items.length - 1];
+        startOrUpdateActivity({
+          suspectName: latest.suspectName ?? '不明',
+          title: latest.title ?? '不明',
+          stationName: latest.stationName,
+          photoUrl: latest.photoUrl,
+        });
       }
     }
   }, [favoritesMap]);

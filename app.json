@@ -19,7 +19,8 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
-        }
+        },
+        "NSSupportsLiveActivities": true
       }
     },
     "android": {

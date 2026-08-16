@@ -1,0 +1,7 @@
+{
+  "name": "live-activity",
+  "version": "0.1.0",
+  "description": "ロック画面/Dynamic Islandに指名手配情報を表示するLive Activityの開始・更新・終了ブリッジ",
+  "main": "index.ts",
+  "license": "MIT"
+}
