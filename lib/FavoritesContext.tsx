@@ -46,10 +46,20 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       console.warn('お気に入りの保存に失敗しました', e);
     });
 
-    // ウィジェット(App Group経由)にもお気に入りIDを共有し、ローテーションに反映させる
+    // ウィジェット(App Group経由)にもお気に入りの中身を共有する。
+    // ウィジェット側は位置情報取得やFirestoreへの直接アクセスを一切行わず、
+    // ここで書き込んだデータをそのまま表示するだけのシンプルな作りにしている。
     if (widgetStorage) {
       try {
-        widgetStorage.set('favoriteIds', JSON.stringify(Object.keys(favoritesMap)));
+        const widgetFavorites = Object.values(favoritesMap).map((item) => ({
+          id: item.id,
+          suspectName: item.suspectName,
+          title: item.title,
+          stationName: item.stationName,
+          photoUrl: item.photoUrl,
+          sourceUrl: item.sourceUrl,
+        }));
+        widgetStorage.set('favorites', JSON.stringify(widgetFavorites));
         ExtensionStorage.reloadWidget();
       } catch (e) {
         console.warn('ウィジェットへのお気に入り共有に失敗しました', e);
