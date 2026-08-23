@@ -13,6 +13,17 @@ jobs:
       - run: npm ci
       - run: npm install -g eas-cli
 
+      - name: Debug - check live-activity module discovery
+        run: |
+          echo "--- modules/ dir ---"
+          ls -la modules/live-activity/ios/
+          echo "--- node_modules symlink ---"
+          ls -la node_modules/live-activity
+          echo "--- autolinking search ---"
+          npx expo-modules-autolinking search --platform apple | grep -A 5 "live-activity" || echo "NOT FOUND by search"
+          echo "--- autolinking resolve ---"
+          npx expo-modules-autolinking resolve --platform apple | grep -B2 -A 10 "LiveActivity" || echo "NOT FOUND by resolve"
+
       - name: Restore iOS credentials from secrets
         run: |
           mkdir -p ios-certs
