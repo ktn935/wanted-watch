@@ -23,6 +23,12 @@ eas-build-log.txt
 build-output/
 *.ipa
 
+# fastlane
+keys/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output
+
 # Metro
 .metro-health-check*
 
