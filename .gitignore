@@ -20,6 +20,8 @@ expo-env.d.ts
 credentials.json
 ios-certs/
 eas-build-log.txt
+build-output/
+*.ipa
 
 # Metro
 .metro-health-check*
