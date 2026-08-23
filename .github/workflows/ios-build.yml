@@ -1,0 +1,51 @@
+name: iOS Build (EAS local build on free macOS runner)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npm install -g eas-cli
+
+      - name: Restore iOS credentials from secrets
+        run: |
+          mkdir -p ios-certs
+          echo "${{ secrets.IOS_DIST_CERT_BASE64 }}" | base64 --decode > ios-certs/distribution.p12
+          echo "${{ secrets.IOS_PROVISIONING_PROFILE_APP_BASE64 }}" | base64 --decode > ios-certs/app.mobileprovision
+          echo "${{ secrets.IOS_PROVISIONING_PROFILE_WIDGET_BASE64 }}" | base64 --decode > ios-certs/widget.mobileprovision
+          cat > credentials.json << EOF
+          {
+            "ios": {
+              "GO": {
+                "provisioningProfilePath": "ios-certs/app.mobileprovision",
+                "distributionCertificate": {
+                  "path": "ios-certs/distribution.p12",
+                  "password": "${{ secrets.IOS_DIST_CERT_PASSWORD }}"
+                }
+              },
+              "widget": {
+                "provisioningProfilePath": "ios-certs/widget.mobileprovision",
+                "distributionCertificate": {
+                  "path": "ios-certs/distribution.p12",
+                  "password": "${{ secrets.IOS_DIST_CERT_PASSWORD }}"
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Build iOS app (local build, no EAS cloud minutes used)
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas build --local --platform ios --profile production --non-interactive --output ./app.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wanted-watch-ios
+          path: app.ipa

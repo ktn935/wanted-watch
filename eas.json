@@ -11,9 +11,22 @@
     "preview": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+      "autoIncrement": true,
+      "credentialsSource": "local",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6804443950",
+        "ascApiKeyPath": "C:/Users/katan/マル秘/AuthKey_855WCW8NQC.p8",
+        "ascApiKeyId": "855WCW8NQC",
+        "ascApiKeyIssuerId": "8b8501f7-0c5f-490a-a126-5062739a7461"
+      }
+    }
   }
 }
