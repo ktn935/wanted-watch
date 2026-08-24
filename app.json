@@ -13,7 +13,9 @@
       "bundleIdentifier": "com.ktn935.wantedwatch",
       "appleTeamId": "AFH9MLDYBU",
       "entitlements": {
-        "com.apple.security.application-groups": ["group.com.ktn935.wantedwatch"]
+        "com.apple.security.application-groups": [
+          "group.com.ktn935.wantedwatch"
+        ]
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -58,7 +60,15 @@
         }
       ],
       "@bacons/apple-targets",
-      "./plugins/withLiveActivityPod.js"
+      "./plugins/withLiveActivityPod.js",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.2"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -74,7 +84,9 @@
                   "bundleIdentifier": "com.ktn935.wantedwatch.widget",
                   "targetName": "widget",
                   "entitlements": {
-                    "com.apple.security.application-groups": ["group.com.ktn935.wantedwatch"]
+                    "com.apple.security.application-groups": [
+                      "group.com.ktn935.wantedwatch"
+                    ]
                   }
                 }
               ]
