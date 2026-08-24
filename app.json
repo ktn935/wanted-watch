@@ -57,7 +57,8 @@
           "locationAlwaysAndWhenInUsePermission": "現在地から近い指名手配情報を表示するために使用します。"
         }
       ],
-      "@bacons/apple-targets"
+      "@bacons/apple-targets",
+      "./plugins/withLiveActivityPod.js"
     ],
     "experiments": {
       "typedRoutes": true
