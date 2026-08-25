@@ -10,6 +10,7 @@ import { WantedListItem } from './types';
 import { startOrUpdateActivity, endActivity } from '@/modules/live-activity';
 
 const STORAGE_KEY = 'wantedWatch:favorites';
+const LIVE_ACTIVITY_PREF_KEY = 'wantedWatch:liveActivityEnabled';
 const APP_GROUP = 'group.com.ktn935.wantedwatch';
 const widgetStorage = Platform.OS === 'ios' ? new ExtensionStorage(APP_GROUP) : null;
 
@@ -17,12 +18,15 @@ type FavoritesContextValue = {
   favorites: WantedListItem[];
   isFavorite: (id: string) => boolean;
   toggleFavorite: (item: WantedListItem) => void;
+  liveActivityEnabled: boolean;
+  setLiveActivityEnabled: (enabled: boolean) => void;
 };
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [favoritesMap, setFavoritesMap] = useState<Record<string, WantedListItem>>({});
+  const [liveActivityEnabled, setLiveActivityEnabledState] = useState(true);
   const hasLoaded = useRef(false);
 
   useEffect(() => {
@@ -32,6 +36,10 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         if (stored) {
           setFavoritesMap(JSON.parse(stored));
         }
+        const storedPref = await AsyncStorage.getItem(LIVE_ACTIVITY_PREF_KEY);
+        if (storedPref != null) {
+          setLiveActivityEnabledState(storedPref === 'true');
+        }
       } catch (e) {
         console.warn('お気に入りの読み込みに失敗しました', e);
       } finally {
@@ -39,6 +47,13 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       }
     })();
   }, []);
+
+  const setLiveActivityEnabled = (enabled: boolean) => {
+    setLiveActivityEnabledState(enabled);
+    AsyncStorage.setItem(LIVE_ACTIVITY_PREF_KEY, String(enabled)).catch((e) => {
+      console.warn('Live Activity設定の保存に失敗しました', e);
+    });
+  };
 
   useEffect(() => {
     // 読み込み完了前に空データで上書きしてしまわないようにガードする
@@ -68,10 +83,10 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     }
 
     // ロック画面/Dynamic IslandのLive Activityは、最後にお気に入り登録した1件を表示する。
-    // お気に入りが無くなったら終了する。
+    // お気に入りが無くなった場合、または設定でオフにされている場合は終了する。
     if (Platform.OS === 'ios') {
       const items = Object.values(favoritesMap);
-      if (items.length === 0) {
+      if (!liveActivityEnabled || items.length === 0) {
         endActivity();
       } else {
         const latest = items[items.length - 1];
@@ -83,7 +98,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         });
       }
     }
-  }, [favoritesMap]);
+  }, [favoritesMap, liveActivityEnabled]);
 
   const toggleFavorite = (item: WantedListItem) => {
     setFavoritesMap((prev) => {
@@ -102,8 +117,8 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const favorites = useMemo(() => Object.values(favoritesMap), [favoritesMap]);
 
   const value = useMemo(
-    () => ({ favorites, isFavorite, toggleFavorite }),
-    [favorites, favoritesMap]
+    () => ({ favorites, isFavorite, toggleFavorite, liveActivityEnabled, setLiveActivityEnabled }),
+    [favorites, favoritesMap, liveActivityEnabled]
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;

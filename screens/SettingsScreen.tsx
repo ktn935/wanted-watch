@@ -2,20 +2,33 @@
 // 「このアプリについて」(出典表記を含む)は画面下部に固定表示する。
 
 import { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 import { theme } from '../constants/Colors';
 import { isExtensionStorageLinked, readWidgetFavoritesRaw } from '../lib/widgetDiagnostics';
+import { useFavorites } from '../lib/FavoritesContext';
 
 export default function SettingsScreen() {
   const [diagnostics, setDiagnostics] = useState<{ linked: boolean; raw: string | null } | null>(
     null
   );
+  const { liveActivityEnabled, setLiveActivityEnabled } = useFavorites();
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.settingsList}>
-        <Text style={styles.placeholder}>他の設定項目は今後追加予定です。</Text>
+        {Platform.OS === 'ios' && (
+          <View style={styles.settingRow}>
+            <Text style={styles.settingLabel}>
+              ロック画面・Dynamic IslandへのLive Activity表示
+            </Text>
+            <Switch
+              value={liveActivityEnabled}
+              onValueChange={setLiveActivityEnabled}
+              trackColor={{ false: theme.border, true: theme.accent }}
+            />
+          </View>
+        )}
 
         {Platform.OS === 'ios' && (
           <View style={styles.diagnosticsBox}>
@@ -47,13 +60,11 @@ export default function SettingsScreen() {
       <View style={styles.aboutSection}>
         <Text style={styles.aboutTitle}>このアプリについて</Text>
         <Text style={styles.aboutBody}>
-          警視庁が公開する指名手配情報を、現在地から近い順に表示するアプリです。
+          全国の警察が公開する指名手配情報を、現在地から近い順に表示するアプリです。
         </Text>
-        <Text style={styles.aboutBody}>
-          表示データは1日1回、警視庁の指名手配ページから取得しています。
-        </Text>
+        <Text style={styles.aboutBody}>表示データは毎週月曜朝に自動更新しています。</Text>
         <Text style={styles.source}>
-          出典:警視庁ホームページ(https://www.keishicho.metro.tokyo.lg.jp/)
+          出典:各都道府県警察・警視庁・警察庁の公式ホームページ
         </Text>
       </View>
     </View>
@@ -63,7 +74,15 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'space-between', backgroundColor: theme.background },
   settingsList: { padding: 16 },
-  placeholder: { fontSize: 14, color: theme.textMuted },
+  settingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.border,
+  },
+  settingLabel: { fontSize: 14, color: theme.text, flex: 1, marginRight: 12 },
   diagnosticsBox: {
     marginTop: 24,
     padding: 12,
