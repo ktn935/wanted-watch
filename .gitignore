@@ -60,3 +60,6 @@ functions/prefectureWatchChanged.json
 # generated native folders
 /ios
 /android
+
+# App Store screenshot元データ(端末の生スクリーンショット。加工済みはfastlane/screenshots/にコミットする)
+/picture
