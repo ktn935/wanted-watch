@@ -15,6 +15,7 @@ const crypto = require('crypto');
 const admin = require('firebase-admin');
 const { scrapeAll } = require('./scrapeAll');
 const { geocode } = require('./geocode');
+const { notifyNewSuspects } = require('./notifyNewSuspects');
 
 function loadCredential() {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
@@ -39,6 +40,11 @@ async function updateWantedList() {
   const items = await scrapeAll();
   const batch = db.batch();
 
+  // 新規追加された事件だけプッシュ通知の対象にするため、既存ドキュメントIDを先に取得しておく
+  const existingIdsSnapshot = await db.collection('wantedSuspects').select().get();
+  const existingIds = new Set(existingIdsSnapshot.docs.map((doc) => doc.id));
+  const newItems = [];
+
   for (const item of items) {
     // 現在地との距離計算用に、発生現場→ダメなら警察署名の順で緯度経度を取得
     const location = (await geocode(item.occurrencePlace)) || (await geocode(item.stationName));
@@ -47,6 +53,15 @@ async function updateWantedList() {
     // base64を単純に60文字で切り詰めると、URLの先頭が共通で末尾(#フラグメント等)
     // だけが違うケース(警察庁sourceなど)でIDが衝突してしまうため、ハッシュ化する。
     const docId = crypto.createHash('sha256').update(item.sourceUrl).digest('hex').slice(0, 40);
+
+    if (!existingIds.has(docId)) {
+      newItems.push({
+        suspectName: item.suspectName,
+        title: item.title,
+        sourceUrl: item.sourceUrl,
+        location,
+      });
+    }
 
     const ref = db.collection('wantedSuspects').doc(docId);
     batch.set(ref, {
@@ -67,7 +82,9 @@ async function updateWantedList() {
   }
 
   await batch.commit();
-  console.log(`${items.length}件の指名手配情報を更新しました`);
+  console.log(`${items.length}件の指名手配情報を更新しました(新規${newItems.length}件)`);
+
+  await notifyNewSuspects(db, newItems);
 }
 
 if (require.main === module) {

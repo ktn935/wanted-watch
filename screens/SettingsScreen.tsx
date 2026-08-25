@@ -1,22 +1,88 @@
-// 設定タブの画面。今後、通知設定などの項目をここに追加していく想定。
+// 設定タブの画面。
 // 「このアプリについて」(出典表記を含む)は画面下部に固定表示する。
 
-import { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { theme } from '../constants/Colors';
 import { isExtensionStorageLinked, readWidgetFavoritesRaw } from '../lib/widgetDiagnostics';
 import { useFavorites } from '../lib/FavoritesContext';
+import { enableNearbyNotifications, disableNearbyNotifications } from '../lib/pushNotifications';
+
+const NEARBY_NOTIFICATIONS_ENABLED_KEY = 'wantedWatch:nearbyNotificationsEnabled';
+const NEARBY_NOTIFICATIONS_TOKEN_KEY = 'wantedWatch:nearbyNotificationsToken';
+
+const PRIVACY_POLICY_URL = 'https://ktn935.github.io/wanted-watch/privacy-policy.html';
+const TERMS_URL = 'https://ktn935.github.io/wanted-watch/terms-of-service.html';
+const SUPPORT_URL = 'https://ktn935.github.io/wanted-watch/support.html';
 
 export default function SettingsScreen() {
   const [diagnostics, setDiagnostics] = useState<{ linked: boolean; raw: string | null } | null>(
     null
   );
   const { liveActivityEnabled, setLiveActivityEnabled } = useFavorites();
+  const [nearbyNotificationsEnabled, setNearbyNotificationsEnabledState] = useState(false);
+  const [notificationsBusy, setNotificationsBusy] = useState(false);
+  const [notificationsError, setNotificationsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem(NEARBY_NOTIFICATIONS_ENABLED_KEY).then((value) => {
+      setNearbyNotificationsEnabledState(value === 'true');
+    });
+  }, []);
+
+  const handleToggleNearbyNotifications = async (next: boolean) => {
+    setNotificationsBusy(true);
+    setNotificationsError(null);
+    try {
+      if (next) {
+        const token = await enableNearbyNotifications();
+        if (!token) {
+          setNotificationsError('通知の許可が必要です。設定アプリから許可してください。');
+          return;
+        }
+        await AsyncStorage.setItem(NEARBY_NOTIFICATIONS_TOKEN_KEY, token);
+        await AsyncStorage.setItem(NEARBY_NOTIFICATIONS_ENABLED_KEY, 'true');
+        setNearbyNotificationsEnabledState(true);
+      } else {
+        const token = await AsyncStorage.getItem(NEARBY_NOTIFICATIONS_TOKEN_KEY);
+        if (token) {
+          await disableNearbyNotifications(token);
+        }
+        await AsyncStorage.setItem(NEARBY_NOTIFICATIONS_ENABLED_KEY, 'false');
+        setNearbyNotificationsEnabledState(false);
+      }
+    } catch (e) {
+      setNotificationsError('設定の変更に失敗しました: ' + (e as Error).message);
+    } finally {
+      setNotificationsBusy(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.settingsList}>
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>近くの新着指名手配を通知(半径20km)</Text>
+          <Switch
+            value={nearbyNotificationsEnabled}
+            onValueChange={handleToggleNearbyNotifications}
+            disabled={notificationsBusy}
+            trackColor={{ false: theme.border, true: theme.accent }}
+          />
+        </View>
+        {notificationsError && <Text style={styles.errorInline}>{notificationsError}</Text>}
+
         {Platform.OS === 'ios' && (
           <View style={styles.settingRow}>
             <Text style={styles.settingLabel}>
@@ -29,6 +95,16 @@ export default function SettingsScreen() {
             />
           </View>
         )}
+
+        <TouchableOpacity style={styles.linkRow} onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}>
+          <Text style={styles.linkText}>プライバシーポリシー</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.linkRow} onPress={() => Linking.openURL(TERMS_URL)}>
+          <Text style={styles.linkText}>利用規約</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.linkRow} onPress={() => Linking.openURL(SUPPORT_URL)}>
+          <Text style={styles.linkText}>サポート・お問い合わせ</Text>
+        </TouchableOpacity>
 
         {Platform.OS === 'ios' && (
           <View style={styles.diagnosticsBox}>
@@ -83,6 +159,13 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.border,
   },
   settingLabel: { fontSize: 14, color: theme.text, flex: 1, marginRight: 12 },
+  errorInline: { fontSize: 12, color: theme.danger, paddingBottom: 8 },
+  linkRow: {
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.border,
+  },
+  linkText: { fontSize: 14, color: theme.accent },
   diagnosticsBox: {
     marginTop: 24,
     padding: 12,

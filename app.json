@@ -68,6 +68,12 @@
             "deploymentTarget": "16.2"
           }
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#ff8c00"
+        }
       ]
     ],
     "experiments": {
