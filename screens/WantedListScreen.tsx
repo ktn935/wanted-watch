@@ -17,8 +17,10 @@ import { fetchWantedSuspects, WantedSuspect } from '../lib/wantedApi';
 import { useFavorites } from '../lib/FavoritesContext';
 import WantedCard from '../components/WantedCard';
 import { theme } from '../constants/Colors';
+import { regionFromSourceName } from '../lib/regions';
 
 type SortKey = 'distance' | 'reward';
+const ALL_REGIONS = 'すべて';
 const ALL_STATIONS = 'すべて';
 
 export default function WantedListScreen() {
@@ -26,6 +28,7 @@ export default function WantedListScreen() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>('distance');
+  const [regionFilter, setRegionFilter] = useState<string>(ALL_REGIONS);
   const [stationFilter, setStationFilter] = useState<string>(ALL_STATIONS);
   const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -53,18 +56,38 @@ export default function WantedListScreen() {
     })();
   }, []);
 
-  const stationOptions = useMemo(() => {
+  const regionOptions = useMemo(() => {
     const names = items
+      .map((item) => regionFromSourceName(item.sourceName))
+      .filter((name): name is string => Boolean(name));
+    return [ALL_REGIONS, ...Array.from(new Set(names))];
+  }, [items]);
+
+  const itemsInRegion = useMemo(() => {
+    return regionFilter === ALL_REGIONS
+      ? items
+      : items.filter((item) => regionFromSourceName(item.sourceName) === regionFilter);
+  }, [items, regionFilter]);
+
+  const stationOptions = useMemo(() => {
+    const names = itemsInRegion
       .map((item) => item.stationName)
       .filter((name): name is string => Boolean(name));
     return [ALL_STATIONS, ...Array.from(new Set(names))];
-  }, [items]);
+  }, [itemsInRegion]);
+
+  // 地方フィルターを変えたら、絞り込み対象外になった警察署の選択は解除する
+  useEffect(() => {
+    if (stationFilter !== ALL_STATIONS && !stationOptions.includes(stationFilter)) {
+      setStationFilter(ALL_STATIONS);
+    }
+  }, [stationOptions, stationFilter]);
 
   const displayedItems = useMemo(() => {
     const filtered =
       stationFilter === ALL_STATIONS
-        ? items
-        : items.filter((item) => item.stationName === stationFilter);
+        ? itemsInRegion
+        : itemsInRegion.filter((item) => item.stationName === stationFilter);
 
     const sorted = [...filtered];
     if (sortKey === 'distance') {
@@ -83,7 +106,7 @@ export default function WantedListScreen() {
       });
     }
     return sorted;
-  }, [items, sortKey, stationFilter]);
+  }, [itemsInRegion, sortKey, stationFilter]);
 
   if (loading) {
     return (
@@ -116,6 +139,20 @@ export default function WantedListScreen() {
             onPress={() => setSortKey('reward')}
           />
         </View>
+        {regionOptions.length > 2 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
+            {regionOptions.map((region) => (
+              <TouchableOpacity
+                key={region}
+                style={[styles.chip, regionFilter === region && styles.chipActive]}
+                onPress={() => setRegionFilter(region)}>
+                <Text style={[styles.chipText, regionFilter === region && styles.chipTextActive]}>
+                  {region}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
           {stationOptions.map((station) => (
             <TouchableOpacity

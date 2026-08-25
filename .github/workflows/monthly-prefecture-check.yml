@@ -1,0 +1,54 @@
+name: Monthly prefecture site check
+
+on:
+  schedule:
+    # UTC 21:00 (1日) = JST 6:00 (2日) 頃、月1回
+    - cron: '0 21 1 * *'
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm ci
+
+      - run: node monitorPrefectures.js
+
+      - name: Create issue if any prefecture page changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CHANGED_COUNT=$(node -e "console.log(require('./prefectureWatchChanged.json').length)")
+          if [ "$CHANGED_COUNT" -gt "0" ]; then
+            BODY=$(node -e "
+              const changed = require('./prefectureWatchChanged.json');
+              const lines = changed.map(c => '- ' + c.prefecture + ': ' + c.url);
+              console.log('以下の都道府県警察サイトのページ内容が前回チェック時から変化していました。氏名・顔写真が取得可能になっていないか確認してください。\n\n' + lines.join('\n'));
+            ")
+            gh issue create \
+              --repo "${{ github.repository }}" \
+              --title "都道府県サイト変更検知: $(date +%Y-%m)" \
+              --body "$BODY"
+          else
+            echo "No changes detected."
+          fi
+
+      - name: Commit updated watch state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add prefectureWatchState.json
+          git diff --cached --quiet || git commit -m "Update prefecture watch state ($(date +%Y-%m-%d))"
+          git push

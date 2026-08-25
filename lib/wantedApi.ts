@@ -17,6 +17,7 @@ export type WantedSuspect = {
   photoUrl: string | null;
   sourceUrl: string;
   sourceLabel: string;
+  sourceName: string | null;
   location: GeoPoint | null;
   rewardAmount?: number | null;
   distanceKm?: number;
