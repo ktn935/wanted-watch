@@ -46,11 +46,14 @@ export async function enableNearbyNotifications(
   if (!token) return null;
 
   const position = await Location.getCurrentPositionAsync({});
+  // プライバシーポリシー上「おおよその位置情報」と明記しているため、
+  // サーバーには約1km単位に丸めた座標のみを保存する(20km圏内の通知判定には十分な精度)。
+  const roundCoord = (value: number) => Math.round(value * 100) / 100;
 
   await setDoc(doc(db, 'pushSubscriptions', token), {
     token,
-    latitude: position.coords.latitude,
-    longitude: position.coords.longitude,
+    latitude: roundCoord(position.coords.latitude),
+    longitude: roundCoord(position.coords.longitude),
     radiusKm,
     enabled: true,
     updatedAt: new Date().toISOString(),
