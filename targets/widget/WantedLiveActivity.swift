@@ -70,18 +70,17 @@ struct WantedLiveActivity: Widget {
         }
     }
 
+    // Live Activityはビューのレンダリング時にネットワークアクセスができないため、
+    // photoUrlにはリモートURLではなく、メインアプリが事前にApp Group共有コンテナへ
+    // 保存したローカルファイルのパスが入っている(LiveActivityControllerModule.swift参照)。
     @ViewBuilder
     private func photoView(urlString: String?, size: CGFloat, corner: CGFloat) -> some View {
-        if let urlString, let url = URL(string: urlString) {
-            AsyncImage(url: url) { phase in
-                if let image = phase.image {
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } else {
-                    Color(white: 0.15)
-                }
-            }
-            .frame(width: size, height: size)
-            .clipShape(RoundedRectangle(cornerRadius: corner))
+        if let path = urlString, let uiImage = UIImage(contentsOfFile: path) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: corner))
         } else {
             RoundedRectangle(cornerRadius: corner)
                 .fill(Color(white: 0.15))
