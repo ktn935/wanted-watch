@@ -1,0 +1,162 @@
+{
+  "青森県": {
+    "hash": "9fa985de92b534aa85637e55d646ceb2028dfcf1cd2e02bd521e45dfdf892b08",
+    "url": "https://www.police.pref.aomori.jp/keijibu/keiji_kikaku/tehai_kyoujo.html",
+    "checkedAt": "2026-09-01T23:05:54.148Z"
+  },
+  "宮城県": {
+    "hash": "9d1b9258cf302d1f3069ec1fda57e260686b2abc727b0d7c002c893e40c04b39",
+    "url": "https://www.police.pref.miyagi.jp/keiso/tehai/index.html",
+    "checkedAt": "2026-09-01T23:05:54.928Z"
+  },
+  "秋田県": {
+    "hash": "5c96c9bc027b85ab6bdb0f4bbd34165df285a81c556e2a686b64f6c5d3d026a1",
+    "url": "https://www.police.pref.akita.lg.jp/odate/news/simeitehai",
+    "checkedAt": "2026-09-01T23:05:56.540Z"
+  },
+  "山形県": {
+    "hash": "31b1d69db750877fce957aae2dd56cafacfadf5114e0ca5dc3ca8d8e0cbe9050",
+    "url": "https://www.pref.yamagata.jp/800054/kensei/police/yamagatakenkeisatsu/profile/shimeitehai.html",
+    "checkedAt": "2026-09-01T23:05:57.192Z"
+  },
+  "福島県": {
+    "hash": "87b548c37b76da74129908bd7569b04781d5bad126d99a7a71db653f3a8d678d",
+    "url": "https://www.police.pref.fukushima.jp/10.jyouhou/-keiji/-jiken/johofiles/miharu01.html",
+    "checkedAt": "2026-09-01T23:05:58.680Z"
+  },
+  "栃木県": {
+    "hash": "1d908ab0fdc2f5c942f7353a9f37cff50ce53db56d183d594bd0b077136dab42",
+    "url": "https://www.pref.tochigi.lg.jp/keisatu/n18/poster.html",
+    "checkedAt": "2026-09-01T23:05:59.000Z"
+  },
+  "群馬県": {
+    "hash": "dad368f28d147f1697a2dfd26e7b01be17bdbfee8deaf18ef5635d29e2d21833",
+    "url": "https://www.police.pref.gunma.jp/28468.html",
+    "checkedAt": "2026-09-01T23:06:02.313Z"
+  },
+  "埼玉県": {
+    "hash": "b454e51d9e5926465f12dbe79d7386579fa2bc162590d40f359ee9ffbd4c1c66",
+    "url": "https://www.police.pref.saitama.lg.jp/e0010/kurashi/sousakyouryoku1.html",
+    "checkedAt": "2026-09-01T23:06:03.894Z"
+  },
+  "新潟県": {
+    "hash": "7aac51e6124a6bfa35ed639983f5ac8f600af8ab28a0db0214cf4c7041c31fa2",
+    "url": "https://www.pref.niigata.lg.jp/site/kenkei/onegai-hyousi1-tehai.html",
+    "checkedAt": "2026-09-01T23:06:04.520Z"
+  },
+  "富山県": {
+    "hash": "fe6da8a693fc7aa8f5cd191996f4886593172186bfaa6f0ea6108cb94376746d",
+    "url": "https://police.pref.toyama.jp/6125/anzen/seikatsuanzen/sousa/simeitehaigekkann.html",
+    "checkedAt": "2026-09-01T23:06:05.563Z"
+  },
+  "石川県": {
+    "hash": "f542b95e2015c3d7fb124d4b0ce750ce5083c824155e2f546cf77648917960c4",
+    "url": "https://www2.police.pref.ishikawa.lg.jp/security/security18/security18_04/security01.html",
+    "checkedAt": "2026-09-01T23:06:06.786Z"
+  },
+  "福井県": {
+    "hash": "029f87e82dc92fb73f32f70ff7572ba5151a1a44b1b40a9417b4c36f4749226e",
+    "url": "https://www.pref.fukui.lg.jp/kenkei/doc/kenkei/naka50.html",
+    "checkedAt": "2026-09-01T23:06:08.538Z"
+  },
+  "長野県": {
+    "hash": "9bab0bc99cb7c999788854d46e2c52ac0c6ec942a104a6a7deab14cd0085d1e0",
+    "url": "https://www.pref.nagano.lg.jp/police/sousa/hansou/tehai.html",
+    "checkedAt": "2026-09-01T23:06:09.668Z"
+  },
+  "滋賀県": {
+    "hash": "8b17fdaa1c71641e687d3e4f0385ccf35b58bb2db537662a717ee691319e26da",
+    "url": "https://www.pref.shiga.lg.jp/police/onegai/jikenzyouhou/348110.html",
+    "checkedAt": "2026-09-01T23:06:34.074Z"
+  },
+  "京都府": {
+    "hash": "af92766f9a95ff8409d4b626844b368966cfbf759459b10cb2654110e73f12e8",
+    "url": "http://www.pref.kyoto.jp/fukei/site/sousa/keiki/index.html",
+    "checkedAt": "2026-09-01T23:06:35.292Z"
+  },
+  "兵庫県": {
+    "hash": "0842ea77c42f6e2352a93f717f4a14145bfdcd72ab9a2487106ffc56aaaf90c5",
+    "url": "https://www.police.pref.hyogo.lg.jp/teikyo/sosa/index.htm",
+    "checkedAt": "2026-09-01T23:06:36.742Z"
+  },
+  "奈良県": {
+    "hash": "2c7441f02b50f6a8af92985e53b07050984739031d4fcab549ae12825f2ff927",
+    "url": "http://www.police.pref.nara.jp/0000000302.html",
+    "checkedAt": "2026-09-01T23:06:40.191Z"
+  },
+  "和歌山県": {
+    "hash": "34fe5c3a272e718d96c2f97f7f1b4fb952bffc7b1423b714afa1be777aac4fb2",
+    "url": "https://www.police.pref.wakayama.lg.jp/01_anzen/index.html",
+    "checkedAt": "2026-09-01T23:06:42.143Z"
+  },
+  "鳥取県": {
+    "hash": "d87140d9f1aad578432f1e0383bf86965afc937962c86f3017394dd7c2b16bde",
+    "url": "http://www.pref.tottori.lg.jp/dd.aspx?menuid=33947",
+    "checkedAt": "2026-09-01T23:06:50.954Z"
+  },
+  "島根県": {
+    "hash": "18ddf6e26664fd42084ea2992862dfd7b12ec9cbde5f4eb0ffc1779d8b827989",
+    "url": "http://www.pref.shimane.lg.jp/police/01_safety_of_life/wanted_incident/",
+    "checkedAt": "2026-09-01T23:06:52.302Z"
+  },
+  "岡山県": {
+    "hash": "d1b41304c32dbfa2e9780c99805ddb4471fec88f62bb738c18c8c2fc5e27f7da",
+    "url": "https://www.pref.okayama.jp/page/400718.html",
+    "checkedAt": "2026-09-01T23:06:54.209Z"
+  },
+  "広島県": {
+    "hash": "87928ae79e5ed73a5f49a7af3faf855e3578bbf41b8245c131fe7cac6d009fca",
+    "url": "https://www.pref.hiroshima.lg.jp/site/police12/tehai.html",
+    "checkedAt": "2026-09-01T23:06:55.078Z"
+  },
+  "徳島県": {
+    "hash": "8079f2cf0f5d638a9ef658587703ceab463627688f02916fe51c6a2cc54348b4",
+    "url": "http://www.police.pref.tokushima.jp/03jyouho/",
+    "checkedAt": "2026-09-01T23:06:57.039Z"
+  },
+  "香川県": {
+    "hash": "2402d98f9138558d32475fc2dc3a270b415202f5dfd3a03cb346a5d08ae4fe8b",
+    "url": "https://www.pref.kagawa.lg.jp/police/otazune/hannintehai/index.html",
+    "checkedAt": "2026-09-01T23:07:01.074Z"
+  },
+  "愛媛県": {
+    "hash": "3652749eadab62297d536c20b5864973def326b10bb8a298dc59e3e4b1f700f0",
+    "url": "http://www.police.pref.ehime.jp/wanted/kennaitehai/matuyamanisi.html",
+    "checkedAt": "2026-09-01T23:07:02.016Z"
+  },
+  "高知県": {
+    "hash": "3dce7fd1672e1d9fac6314cb9dc2694e4e1e5ed05571a2a4633944869a58dd52",
+    "url": "https://www.police.pref.kochi.lg.jp/category/bumon/keiji/kikaku/",
+    "checkedAt": "2026-09-01T23:07:03.119Z"
+  },
+  "佐賀県": {
+    "hash": "603e4ace79d15bdb5d643f01c7c0d6d4ef05d0f5f1d41a4116cbe98a7bb3e4fa",
+    "url": "https://www.police.pref.saga.jp/shimeitehai_teikyo.html",
+    "checkedAt": "2026-09-01T23:07:05.193Z"
+  },
+  "長崎県": {
+    "hash": "b5cee502c7770a782dca4dc6f0befd94dc8fe403bb84d4b3dda596b4f47c9c7d",
+    "url": "https://www.police.pref.nagasaki.jp/police/kurashi/joho-teikyo/shimei-tehai/",
+    "checkedAt": "2026-09-01T23:07:07.249Z"
+  },
+  "熊本県": {
+    "hash": "d3d03fa1cbfa80dc29bcf715bc4a87ad1995977402e37081ff083a5b97dd2d22",
+    "url": "https://www.pref.kumamoto.jp/site/police/8603.html",
+    "checkedAt": "2026-09-01T23:07:09.536Z"
+  },
+  "大分県": {
+    "hash": "5c236f85e57b3d6b4d7e0c5957ace29a4caffc4ad34abd5831b123c66b3d3afe",
+    "url": "http://www.pref.oita.jp/site/keisatu/tehaichu.html",
+    "checkedAt": "2026-09-01T23:07:10.547Z"
+  },
+  "宮崎県": {
+    "hash": "da208acf0c21086f49c2416893041d8103a55523c8710c7140f79b110fdd228b",
+    "url": "https://www.pref.miyazaki.lg.jp/police/invest/simeitehai.html",
+    "checkedAt": "2026-09-01T23:07:11.742Z"
+  },
+  "鹿児島県": {
+    "hash": "02c19fa73381db838afbda0783e0c62cedd36d8b8059593095f40e51f2dc2921",
+    "url": "http://www.pref.kagoshima.jp/ja07/police/onegai/index.html",
+    "checkedAt": "2026-09-01T23:07:12.752Z"
+  }
+}
